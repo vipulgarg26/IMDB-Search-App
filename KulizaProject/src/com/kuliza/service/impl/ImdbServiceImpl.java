@@ -204,6 +204,8 @@ public class ImdbServiceImpl implements ImdbService {
 												// location
 		List<Review> reviews = new ArrayList<>(); // list to store review
 													// objects
+		List<Review> topReviews = new ArrayList<>(); // list to store the top 3
+														// reviews
 		Document documentReleaseDate, documentReview;
 
 		try {
@@ -234,7 +236,7 @@ public class ImdbServiceImpl implements ImdbService {
 																						// review
 																						// pages
 
-				logger.info(reviewUrl);
+				//logger.info(reviewUrl);
 				documentReview = Jsoup.connect(reviewUrl).userAgent("Chrome").get();
 				Elements reviewUse = documentReview.select("div > small"); // list
 																			// of
@@ -352,19 +354,17 @@ public class ImdbServiceImpl implements ImdbService {
 			 * logger.info(reviews.get(2).getUsefulness());
 			 */
 
-			while (reviews.size() > 3) { // getting the top 3 reviews from the
-											// list
-				reviews.remove(reviews.size() - 1);
+			for (index = 0; index < 3; index++) {		// to save top 3 reviews from the sorted reviewList
+				topReviews.add(reviews.get(index));
 			}
-
-			logger.info(reviews);
+			//logger.info(topReviews);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		movie.setOtherRelease(otherRelease);
-		movie.setReviews(reviews); // setting the top 3 review details into the
+		movie.setReviews(topReviews); // setting the top 3 review details into the
 									// movie object
 		return movie;
 	}
