@@ -236,7 +236,7 @@ public class ImdbServiceImpl implements ImdbService {
 																						// review
 																						// pages
 
-				//logger.info(reviewUrl);
+				// logger.info(reviewUrl);
 				documentReview = Jsoup.connect(reviewUrl).userAgent("Chrome").get();
 				Elements reviewUse = documentReview.select("div > small"); // list
 																			// of
@@ -348,24 +348,34 @@ public class ImdbServiceImpl implements ImdbService {
 			Collections.sort(reviews); // Sorting the reviews based on their
 										// usefulness
 
-			/*
-			 * logger.info(reviews.get(0).getUsefulness());
-			 * logger.info(reviews.get(1).getUsefulness());
-			 * logger.info(reviews.get(2).getUsefulness());
-			 */
+			logger.info(reviews.get(0).getUsefulness());
+			logger.info(reviews.get(1).getUsefulness());
+			logger.info(reviews.get(2).getUsefulness());
 
-			for (index = 0; index < 3; index++) {		// to save top 3 reviews from the sorted reviewList
-				topReviews.add(reviews.get(index));
+			if (reviews.size() >= 3) {
+				for (index = 0; index < 3; index++) { // to save top 3 reviews
+														// from the sorted
+														// reviewList
+					topReviews.add(reviews.get(index));
+				}
 			}
-			//logger.info(topReviews);
+			else{
+				
+				for(index=0;index<reviews.size();index++){
+					topReviews.add(reviews.get(index));
+				}
+			}
+
+			// logger.info(topReviews);
 
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		movie.setOtherRelease(otherRelease);
-		movie.setReviews(topReviews); // setting the top 3 review details into the
-									// movie object
+		movie.setReviews(topReviews); // setting the top 3 review details into
+										// the
+										// movie object
 		return movie;
 	}
 
