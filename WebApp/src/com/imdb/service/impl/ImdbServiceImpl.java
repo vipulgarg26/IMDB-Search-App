@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -59,10 +60,10 @@ public class ImdbServiceImpl implements ImdbService {
 																				// web
 																				// service
 			
-			logger.info("json string -----------------  " + searchData);
+			//logger.info("json string -----------------  " + searchData);
 			
-			if (searchData.charAt(0) == '{') {
-				String filteredData = searchData.substring(1, searchData.length() - 1); // removing
+			if (searchData.charAt(2) != 'e') {
+				//String filteredData = searchData.substring(1, searchData.length() - 1); // removing
 																						// [
 																						// ]
 																						// from
@@ -79,7 +80,7 @@ public class ImdbServiceImpl implements ImdbService {
 																						// }]
 				// logger.info(filteredData);
 
-				object = jsonParser.parse(filteredData); // parsing the data
+				object = jsonParser.parse(searchData); // parsing the data
 															// string
 															// into a json
 															// object
@@ -146,24 +147,29 @@ public class ImdbServiceImpl implements ImdbService {
 		String movieSearch;
 		for (String movie : movieList) {
 			Movie movieObject = new Movie();
+			movie = movie.replaceAll(" ", "+");
 			movieSearch = "http://www.myapifilms.com/imdb/idIMDB?title=" + movie
 					+ "&token=5d40001a-7926-439f-82cb-19b811a6a8b7&format=json&language=en-us&aka=0&business=0&seasons=0&seasonYear=0&technical=0&filter=2&exactFilter=0&limit=1&forceYear=0&trailers=0&movieTrivia=0&awards=0&moviePhotos=0&movieVideos=0&actors=0&biography=0&uniqueName=0&filmography=0&bornAndDead=0&starSign=0&actorActress=0&actorTrivia=0&similarMovies=0&adultSearch=0&goofs=0&quotes=0&fullSize=0";
 			jsonObject = getImdbData(movieSearch);
-			movieObject.setTitle((String) jsonObject.get("title"));
-			movieObject.setUrlIMDB((String) jsonObject.get("urlIMDB"));
-			movieObject.setUrlPoster((String) jsonObject.get("urlPoster"));
-			movieObject.setRating((String) jsonObject.get("rating"));
-			movieObject.setVotes((String) jsonObject.get("votes"));
-			movieObject.setYear((String) jsonObject.get("year"));
-			movieObject.setGlobalRelease((String) jsonObject.get("releaseDate"));
-			List<String> countries = (List<String>) jsonObject.get("countries");
-			List<String> runtime = (List<String>) jsonObject.get("runtime");
-			List<String> genres = (List<String>) jsonObject.get("genres");
+			JSONObject dataJSON = (JSONObject)jsonObject.get("data");
+			JSONArray detailsArray = (JSONArray)dataJSON.get("movies");
+			JSONObject detailObject = (JSONObject)detailsArray.get(0);
+			movieObject.setTitle((String) detailObject.get("title"));
+			movieObject.setUrlIMDB((String) detailObject.get("urlIMDB"));
+			movieObject.setUrlPoster((String) detailObject.get("urlPoster"));
+			movieObject.setRating((String) detailObject.get("rating"));
+			movieObject.setVotes((String) detailObject.get("votes"));
+			movieObject.setYear((String) detailObject.get("year"));
+			movieObject.setGlobalRelease((String) detailObject.get("releaseDate"));
+			List<String> countries = (List<String>) detailObject.get("countries");
+			//List<String> runtime = (List<String>) detailObject.get("runtime");
+			List<String> genres = (List<String>) detailObject.get("genres");
 			movieObject.setCountry(countries.get(0));
-			movieObject.setRuntime(runtime.get(0));
-			movieObject.setRated((String) jsonObject.get("rated"));
+			movieObject.setRuntime((String)detailObject.get("runtime"));
+			movieObject.setRated((String) detailObject.get("rated"));
 			movieObject.setGenres(genres);
 			movieObjectList.add(movieObject);
+			logger.info("movie detail added");
 		}
 		return movieObjectList;
 	}

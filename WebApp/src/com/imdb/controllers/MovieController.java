@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
@@ -54,11 +56,13 @@ public class MovieController {
 	@RequestMapping(value = "/searchActor", headers = "Accept=application/json")
 	public String resultPage(@RequestParam("actor") String actorName, ModelMap map) {
 		BasicConfigurator.configure();
+		JSONParser jsonParser = new JSONParser();
 		List<Movie> movieObjectList = new ArrayList<>();
 		List<String> movieList = new ArrayList<>();
 		int index;
 
 		try {
+			actorName = actorName.replaceAll(" ", "+");
 			String actorSearch = "http://www.myapifilms.com/imdb/idIMDB?name=" + actorName
 					+ "&token=5d40001a-7926-439f-82cb-19b811a6a8b7&format=json&language=en-us&filmography=0&exactFilter=0&limit=1&bornDied=0&starSign=0&uniqueName=0&actorActress=0&actorTrivia=0&actorPhotos=0&actorVideos=0&salary=0&spouses=0&tradeMark=0&personalQuotes=0&starMeter=0&fullSize=0";
 			 logger.info(actorSearch);
@@ -78,7 +82,12 @@ public class MovieController {
 			if (jsonObject != null) {
 				
 				logger.info("----------------------------------------json not empty-------------------");
-				String ImdbId = (String) jsonObject.get("idIMDB"); // stores
+				
+				JSONObject dataJson = (JSONObject)jsonObject.get("data");
+				JSONArray details = (JSONArray)dataJson.get("names");
+				JSONObject detailJson = (JSONObject)details.get(0);
+				//logger.info("////  " + detailJson.get("idIMDB"));
+				String ImdbId = (String) detailJson.get("idIMDB"); // stores
 																	// actor's
 																	// imdb Id
 				// logger.info(ImdbId);
@@ -136,6 +145,7 @@ public class MovieController {
 			e.printStackTrace();
 		}
 
+		actorName = actorName.replace("+", "");
 		map.addAttribute("actor", actorName); // throwing the actor's name and
 												// his movie details on to the
 												// next jsp page for display
